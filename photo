@@ -33,7 +33,7 @@ class MainWindow(QMainWindow):
         
         button1.clicked.connect(self.show_file_dialog)
         button2.clicked.connect(self.flip_image)
-        button3.clicked.connect(self.tb_image)
+        button3.clicked.connect(self.tp_image)
         button4.clicked.connect(self.clear_label)
         button5.clicked.connect(self.gray_image)
         button6.clicked.connect(self.mask_image)
