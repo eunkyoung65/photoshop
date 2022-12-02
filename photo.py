@@ -30,6 +30,10 @@ class MainWindow(QMainWindow):
         button5 = QPushButton("흑백전환")
         button6 = QPushButton("블러처리")
         button7 = QPushButton("사진반전")
+        button8 = QPushButton("사진 원형모양 자르기")
+        button9 = QPushButton("볼록효과")
+
+
 
 
 
@@ -41,6 +45,10 @@ class MainWindow(QMainWindow):
         button5.clicked.connect(self.gray_image)
         button6.clicked.connect(self.blur_image)
         button7.clicked.connect(self.reverse_image)
+        button8.clicked.connect(self.circle_image)
+        button9.clicked.connect(self.convex_image)
+
+
 
 
 
@@ -52,8 +60,13 @@ class MainWindow(QMainWindow):
         sidebar.addWidget(button5)
         sidebar.addWidget(button6)
         sidebar.addWidget(button7)
+        sidebar.addWidget(button8)
+        sidebar.addWidget(button9)
 
-   
+        
+
+
+
 
 
 
@@ -134,6 +147,47 @@ class MainWindow(QMainWindow):
     def reverse_image(self):
         image = cv2.bitwise_not(self.image)
         h, w, _ = image.shape
+        bytes_per_line = 3 * w
+        image = QImage(image.data, w, h, bytes_per_line, QImage.Format_RGB888).rgbSwapped()
+        pixmap = QPixmap(image)
+        self.label2.setPixmap(pixmap)
+
+
+    def circle_image(self):
+        image = self.image
+        h, w = image.shape[:2]
+        mask = np.zeros_like(image)
+        cv2.circle(mask, (int(w/2), int(w/2)), int(w/2), (255, 255, 255), -1)
+        image = cv2.bitwise_and(image, mask)
+        bytes_per_line = 3 * w
+        image = QImage(
+            image.data, w, h, bytes_per_line, QImage.Format_RGB888
+        ).rgbSwapped()
+        pixmap = QPixmap(image)
+        self.label2.setPixmap(pixmap)
+
+
+
+
+    def convex_image(self):
+        image = self.image
+        h, w = image.shape[:2]
+        exp = 2
+        scale = 1
+        mapy, mapx = np.indices((h, w), dtype=np.float32)
+
+        mapx = 2 * mapx / (w - 1) -1
+        mapy = 2 * mapy / (h - 1) -1
+
+        r, theta = cv2.cartToPolar(mapx, mapy) 
+        r[r < scale] = r[r < scale] ** exp 
+
+        mapx, mapy = cv2.polarToCart(r, theta) 
+        mapx = ((mapx + 1) * w - 1) /2 
+        mapy = ((mapy + 1) * h - 1) / 2 
+
+        image = cv2.remap(image, mapx, mapy, cv2.INTER_LINEAR) 
+
         bytes_per_line = 3 * w
         image = QImage(image.data, w, h, bytes_per_line, QImage.Format_RGB888).rgbSwapped()
         pixmap = QPixmap(image)
