@@ -28,7 +28,10 @@ class MainWindow(QMainWindow):
         button3 = QPushButton("상하반전")
         button4 = QPushButton("새로고침")
         button5 = QPushButton("흑백전환")
-        button6 = QPushButton("원형사진")
+        button6 = QPushButton("블러처리")
+        button7 = QPushButton("사진반전")
+
+
 
         
         button1.clicked.connect(self.show_file_dialog)
@@ -36,7 +39,10 @@ class MainWindow(QMainWindow):
         button3.clicked.connect(self.tp_image)
         button4.clicked.connect(self.clear_label)
         button5.clicked.connect(self.gray_image)
-        button6.clicked.connect(self.mask_image)
+        button6.clicked.connect(self.blur_image)
+        button7.clicked.connect(self.reverse_image)
+
+
 
 
         sidebar.addWidget(button1)
@@ -45,6 +51,10 @@ class MainWindow(QMainWindow):
         sidebar.addWidget(button4)
         sidebar.addWidget(button5)
         sidebar.addWidget(button6)
+        sidebar.addWidget(button7)
+
+   
+
 
 
 
@@ -61,6 +71,8 @@ class MainWindow(QMainWindow):
         widget = QWidget(self)
         widget.setLayout(main_layout)
         self.setCentralWidget(widget)
+
+
     
     def show_file_dialog(self):
         file_name = QFileDialog.getOpenFileName(self, "이미지 열기", "./")
@@ -99,30 +111,36 @@ class MainWindow(QMainWindow):
 
     
     def gray_image(self):
-      image = cv2.cvtColor(self.image,cv2.COLOR_BGR2GRAY)
-      h, w, _ = image.shape
-      bytes_per_line = 3 * w
-      image = QImage(
-          image.data, w, h, bytes_per_line, QImage.Format_RGB888
-      ).rgbSwapped()
-      pixmap = QPixmap(image)
-      self.label1.setPixmap(pixmap)
-      self.label2.setPixmap(pixmap)
+        image = cv2.cvtColor(self.image, cv2.COLOR_RGB2GRAY)
+        h, w = image.shape
+        byte_per_line = 1 * w
+        image = QImage(
+            image.data, w, h, byte_per_line, QImage.Format_Grayscale8)
+        pixmap = QPixmap(image)
+        self.label2.setPixmap(pixmap)
 
-    def mask_image(self):
-      mask = np.zeros_like(self.image)
-      cv2.circle(mask, (h//2, h//2), h//3, (255, 255, 255), -1)
-      image = cv2.bitwise_and(self.image, mask)
-       h, w, _ = image.shape
-      bytes_per_line = 3 * w
-      image = QImage(
-          image.data, w, h, bytes_per_line, QImage.Format_RGB888
-      ).rgbSwapped()
-      pixmap = QPixmap(image)
-      self.label1.setPixmap(pixmap)
-      self.label2.setPixmap(pixmap)
+      
+      
+    def blur_image(self):
+        image = cv2.medianBlur(self.image, 5)
+        h, w, _ = image.shape
+        bytes_per_line = 3 * w
+        image = QImage(image.data, w, h, bytes_per_line, QImage.Format_RGB888).rgbSwapped()
+        pixmap = QPixmap(image)
+        self.label2.setPixmap(pixmap)
 
 
+
+    def reverse_image(self):
+        image = cv2.bitwise_not(self.image)
+        h, w, _ = image.shape
+        bytes_per_line = 3 * w
+        image = QImage(image.data, w, h, bytes_per_line, QImage.Format_RGB888).rgbSwapped()
+        pixmap = QPixmap(image)
+        self.label2.setPixmap(pixmap)
+
+
+        
 
 
 
